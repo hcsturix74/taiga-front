@@ -129,18 +129,21 @@
         &:hover {
             background: $primary-light;
         }
-        &.active {
-            background: $primary-light;
-            &:hover {
-                background: rgba($primary-light, .2);
-            }
-        }
         &.is-hover {
             background: $red;
             color: $whitish;
             transition: background .3s;
-            path {
+            svg {
                 fill: $red-light;
+            }
+        }
+        &.active {
+            background: $primary-light;
+            &:hover {
+                background: $red-light;
+            }
+            svg {
+                fill: $white;
             }
         }
 
