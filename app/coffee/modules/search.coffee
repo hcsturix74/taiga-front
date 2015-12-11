@@ -174,7 +174,7 @@ SearchDirective = ($log, $compile, $templatecache, $routeparams, $location) ->
     linkTable = ($scope, $el, $attrs, $ctrl) ->
         applyAutoTab = true
         activeSectionName = "userstories"
-        tabsDom = $el.find("section.search-filter")
+        tabsDom = $el.find(".search-filter")
         lastSearchResults = null
 
         getActiveSection = (data) ->
@@ -206,8 +206,13 @@ SearchDirective = ($log, $compile, $templatecache, $routeparams, $location) ->
 
         renderFilterTabs = (data) ->
             for name, value of data
-                continue if name == "count"
-                tabsDom.find("li.#{name} .num").html(value.length)
+                console.log data
+                #continue if name == "count"
+                if !value.length
+                    tabsDom.find("li.#{name}").hide()
+                else
+                    tabsDom.find("li.#{name}").show()
+                    tabsDom.find("li.#{name} .num").html(value.length)
 
         markSectionTabActive = (section) ->
             # Mark as active the item with max amount of results
