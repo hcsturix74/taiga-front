@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -35,7 +38,7 @@ TagsDirective = ->
 
     parser = (v) ->
         return [] if not v
-        result = _(v.split(",")).map((x) -> _.str.trim(x))
+        result = _(v.split(",")).map((x) -> _.trim(x))
 
         return result.value()
 
@@ -117,10 +120,13 @@ LbTagLineDirective = ($rs, $template, $compile) ->
                     tag.style = "border-left: 5px solid #{tag.color}"
 
             html = $compile(templateTags(ctx))($scope)
-            $el.find("div.tags-container").html(html)
+            $el.find(".tags-container").html(html)
 
-        showSaveButton = -> $el.find(".save").removeClass("hidden")
-        hideSaveButton = -> $el.find(".save").addClass("hidden")
+        showSaveButton = ->
+            $el.find(".save").removeClass("hidden")
+
+        hideSaveButton = ->
+            $el.find(".save").addClass("hidden")
 
         resetInput = ->
             $el.find("input").val("")
@@ -156,22 +162,15 @@ LbTagLineDirective = ($rs, $template, $compile) ->
             addValue(value)
             resetInput()
 
-        removeInputLastCharacter = (input) =>
-            inputValue = input.val()
-            input.val inputValue.substring(0, inputValue.length - 1)
-
         ## Events
         $el.on "keypress", "input", (event) ->
-            return if event.keyCode != ENTER_KEY
-            event.preventDefault()
-
-        $el.on "keyup", "input", (event) ->
             target = angular.element(event.currentTarget)
 
             if event.keyCode == ENTER_KEY
+                event.preventDefault()
                 saveInputTag()
-            else if event.keyCode == COMMA_KEY
-                removeInputLastCharacter(target)
+            else if String.fromCharCode(event.keyCode) == ','
+                event.preventDefault()
                 saveInputTag()
             else
                 if target.val().length
@@ -183,7 +182,7 @@ LbTagLineDirective = ($rs, $template, $compile) ->
             event.preventDefault()
             saveInputTag()
 
-        $el.on "click", ".icon-delete", (event) ->
+        $el.on "click", ".remove-tag", (event) ->
             event.preventDefault()
             target = angular.element(event.currentTarget)
 
@@ -290,9 +289,10 @@ TagLineDirective = ($rootScope, $repo, $rs, $confirm, $qqueue, $template, $compi
                 $confirm.notify("error")
                 model.revert()
                 $model.$setViewValue(model)
-            $repo.save(model).then(onSuccess, onError)
 
             hideSaveButton()
+
+            return $repo.save(model).then(onSuccess, onError)
 
         deleteValue = $qqueue.bindAdd (value) ->
             value = trim(value.toLowerCase())
@@ -320,33 +320,27 @@ TagLineDirective = ($rootScope, $repo, $rs, $confirm, $qqueue, $template, $compi
             addValue(value)
             resetInput()
 
-        removeInputLastCharacter = (input) =>
-            inputValue = input.val()
-            input.val inputValue.substring(0, inputValue.length - 1)
-
         ## Events
         $el.on "keypress", "input", (event) ->
-            return if event.keyCode not in [ENTER_KEY, ESC_KEY]
-            event.preventDefault()
-
-        $el.on "keyup", "input", (event) ->
             target = angular.element(event.currentTarget)
 
             if event.keyCode == ENTER_KEY
                 saveInputTag()
-            else if event.keyCode == COMMA_KEY
-                removeInputLastCharacter(target)
+            else if String.fromCharCode(event.keyCode) == ','
+                event.preventDefault()
                 saveInputTag()
-            else if event.keyCode == ESC_KEY
-                resetInput()
-                hideInput()
-                hideSaveButton()
-                showAddTagButton()
             else
                 if target.val().length
                     showSaveButton()
                 else
                     hideSaveButton()
+
+        $el.on "keyup", "input", (event) ->
+            if event.keyCode == ESC_KEY
+                resetInput()
+                hideInput()
+                hideSaveButton()
+                showAddTagButton()
 
         $el.on "click", ".save", (event) ->
             event.preventDefault()
@@ -357,7 +351,7 @@ TagLineDirective = ($rootScope, $repo, $rs, $confirm, $qqueue, $template, $compi
             hideAddTagButton()
             showInput()
 
-        $el.on "click", ".icon-delete", (event) ->
+        $el.on "click", ".remove-tag", (event) ->
             event.preventDefault()
             target = angular.element(event.currentTarget)
 

@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -56,12 +59,12 @@ class ConfirmService extends taiga.Service
         el = angular.element(lightboxSelector)
 
         # Render content
-        el.find("h2.title").text(title)
-        el.find("span.subtitle").text(subtitle)
-        el.find("span.message").text(message)
+        el.find(".title").text(title)
+        el.find(".subtitle").text(subtitle)
+        el.find(".message").text(message)
 
         # Assign event handlers
-        el.on "click.confirm-dialog", "a.button-green", debounce 2000, (event) =>
+        el.on "click.confirm-dialog", ".button-green", debounce 2000, (event) =>
             event.preventDefault()
             target = angular.element(event.currentTarget)
             currentLoading = @loading()
@@ -74,7 +77,7 @@ class ConfirmService extends taiga.Service
                         @.hide(el)
             }
 
-        el.on "click.confirm-dialog", "a.button-red", (event) =>
+        el.on "click.confirm-dialog", ".button-red", (event) =>
             event.preventDefault()
             defered.reject()
             @.hide(el)
@@ -92,22 +95,23 @@ class ConfirmService extends taiga.Service
         el = angular.element(lightboxSelector)
 
         # Render content
-        el.find(".title").html(title)
-        el.find(".subtitle").html(subtitle)
+        el.find(".title").text(title)
+        el.find(".subtitle").text(subtitle)
 
         if replacement
-            el.find(".replacement").html(replacement)
+            el.find(".replacement").text(replacement)
         else
             el.find(".replacement").remove()
 
         if warning
-            el.find(".warning").html(warning)
+            el.find(".warning").text(warning)
         else
             el.find(".warning").remove()
 
         choicesField = el.find(".choices")
         choicesField.html('')
         _.each choices, (value, key) ->
+            value = _.escape(value)
             choicesField.append(angular.element("<option value='#{key}'>#{value}</option>"))
 
         # Assign event handlers
@@ -125,7 +129,7 @@ class ConfirmService extends taiga.Service
                         @.hide(el)
             }
 
-        el.on "click.confirm-dialog", "a.button-red", (event) =>
+        el.on "click.confirm-dialog", ".button-red", (event) =>
             event.preventDefault()
             defered.reject()
             @.hide(el)
@@ -140,15 +144,15 @@ class ConfirmService extends taiga.Service
         el = angular.element(".lightbox-generic-error")
 
         # Render content
-        el.find("h2.title").html(message)
+        el.find(".title").html(message)
 
         # Assign event handlers
-        el.on "click.confirm-dialog", "a.button-green", (event) =>
+        el.on "click.confirm-dialog", ".button-green", (event) =>
             event.preventDefault()
             defered.resolve()
             @.hide(el)
 
-        el.on "click.confirm-dialog", "a.close", (event) =>
+        el.on "click.confirm-dialog", ".close", (event) =>
             event.preventDefault()
             defered.resolve()
             @.hide(el)
@@ -163,16 +167,16 @@ class ConfirmService extends taiga.Service
         el = angular.element(".lightbox-generic-success")
 
         # Render content
-        el.find("h2.title").html(title) if title
-        el.find("p.message").html(message) if message
+        el.find(".title").html(title) if title
+        el.find(".message").html(message) if message
 
         # Assign event handlers
-        el.on "click.confirm-dialog", "a.button-green", (event) =>
+        el.on "click.confirm-dialog", ".button-green", (event) =>
             event.preventDefault()
             defered.resolve()
             @.hide(el)
 
-        el.on "click.confirm-dialog", "a.close", (event) =>
+        el.on "click.confirm-dialog", ".close", (event) =>
             event.preventDefault()
             defered.resolve()
             @.hide(el)
@@ -185,15 +189,15 @@ class ConfirmService extends taiga.Service
         el = angular.element(".lightbox-generic-loading")
 
         # Render content
-        el.find("h2.title").html(title) if title
-        el.find("p.message").html(message) if message
+        el.find(".title").html(title) if title
+        el.find(".message").html(message) if message
 
         return {
             start: => @lightboxService.open(el)
             stop: => @lightboxService.close(el)
             update: (status, title, message, percent) =>
-                el.find("h2.title").html(title) if title
-                el.find("p.message").html(message) if message
+                el.find(".title").html(title) if title
+                el.find(".message").html(message) if message
 
                 if percent
                     el.find(".spin").addClass("hidden")
@@ -247,7 +251,7 @@ class ConfirmService extends taiga.Service
 
             delete @.tsem
 
-        el.on "click", ".icon-delete, .close", (event) =>
+        el.on "click", ".icon-close, .close", (event) =>
             body.find(selector)
                 .removeClass('active')
                 .addClass('inactive')

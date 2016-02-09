@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -190,7 +193,7 @@ EditRoleDirective = ($repo, $confirm) ->
 
             toggleView()
 
-        $el.on "click", "a.icon-edit", ->
+        $el.on "click", ".edit-value", ->
             toggleView()
             $el.find("input").focus()
             $el.find("input").val($scope.role.name)
@@ -248,7 +251,7 @@ NewRoleDirective = ($tgrepo, $confirm) ->
                     project: $scope.projectId
                     name: target.val()
                     permissions: DEFAULT_PERMISSIONS
-                    order: _.max($scope.roles, (r) -> r.order).order + 1
+                    order: _.maxBy($scope.roles, (r) -> r.order).order + 1
                     computable: false
                 }
 
@@ -289,7 +292,9 @@ RolePermissionsDirective = ($rootscope, $repo, $confirm, $compile) ->
                  title="{{ '<%- permission.name %>' | translate }}"></div>
         <% }) %>
     </div>
-    <div class="icon icon-arrow-bottom"></div>
+    <svg class="icon icon-arrow-right">
+        <use xlink:href="#icon-arrow-right">
+    </svg>
     """)
 
     categoryTemplate = _.template("""
@@ -428,6 +433,7 @@ RolePermissionsDirective = ($rootscope, $repo, $confirm, $compile) ->
             $el.on "click", ".resume", (event) ->
                 event.preventDefault()
                 target = angular.element(event.currentTarget)
+                target.toggleClass("open-drawer")
                 target.next().toggleClass("open")
 
             $el.on "change", ".category-item input", (event) ->

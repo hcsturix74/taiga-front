@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -93,21 +96,37 @@ module.factory("$selectedText", ["$window", "$document", SelectedText])
 ## Permission directive, hide elements when necessary
 #############################################################################
 
-CheckPermissionDirective = ->
+CheckPermissionDirective = (projectService) ->
     render = ($el, project, permission) ->
-        $el.removeClass('hidden') if project.my_permissions.indexOf(permission) > -1
+        if project && permission
+            $el.removeClass('hidden') if project.get('my_permissions').indexOf(permission) > -1
 
     link = ($scope, $el, $attrs) ->
         $el.addClass('hidden')
         permission = $attrs.tgCheckPermission
 
-        $scope.$watch "project", (project) ->
-            render($el, project, permission) if project?
+        unwatch = $scope.$watch () ->
+            return projectService.project
+        , () ->
+            return if !projectService.project
+
+            render($el, projectService.project, permission)
+            unwatch()
+
+        unObserve = $attrs.$observe "tgCheckPermission", (permission) ->
+            return if !permission
+
+            render($el, projectService.project, permission)
+            unObserve()
 
         $scope.$on "$destroy", ->
             $el.off()
 
     return {link:link}
+
+CheckPermissionDirective.$inject = [
+    "tgProjectService"
+]
 
 module.directive("tgCheckPermission", CheckPermissionDirective)
 
@@ -216,26 +235,6 @@ module.factory("$projectUrl", ["$tgNavUrls", ProjectUrl])
 
 
 #############################################################################
-## Limite line size in a text area
-#############################################################################
-
-LimitLineLengthDirective = () ->
-    link = ($scope, $el, $attrs) ->
-        maxColsPerLine = parseInt($el.attr("cols"))
-        $el.on "keyup", (event) ->
-            code = event.keyCode
-            lines = $el.val().split("\n")
-
-            _.each lines, (line, index) ->
-                lines[index] = line.substring(0, maxColsPerLine - 2)
-
-            $el.val(lines.join("\n"))
-
-    return {link:link}
-
-module.directive("tgLimitLineLength", LimitLineLengthDirective)
-
-#############################################################################
 ## Queue Q promises
 #############################################################################
 
@@ -289,13 +288,11 @@ Capslock = ($translate) ->
     link = ($scope, $el, $attrs) ->
         open = false
 
-        warningIcon = $('<div>')
-            .addClass('icon')
-            .addClass('icon-capslock')
-            .attr('title', $translate.instant('COMMON.CAPSLOCK_WARNING'))
+
+        warningIcon = "<svg class='icon icon-capslock' title='" + $translate.instant('COMMON.CAPSLOCK_WARNING') + "'><use xlink:href='#icon-capslock'></svg>";
 
         hideIcon = () ->
-            warningIcon.fadeOut () ->
+            $('.icon-capslock').fadeOut () ->
                 open = false
 
                 $(this).remove()

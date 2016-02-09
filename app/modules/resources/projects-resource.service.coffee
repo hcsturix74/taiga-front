@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,20 @@ pagination = () ->
 
 Resource = (urlsService, http, paginateResponseService) ->
     service = {}
+
+    service.getProjects = (params = {}, pagination = true) ->
+        url = urlsService.resolve("projects")
+
+        httpOptions = {}
+
+        if !pagination
+            httpOptions = {
+                headers: {
+                    "x-lazy-pagination": true
+                }
+            }
+
+        return http.get(url, params, httpOptions)
 
     service.getProjectBySlug = (projectSlug) ->
         url = urlsService.resolve("projects")

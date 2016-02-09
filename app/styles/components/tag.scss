@@ -38,13 +38,33 @@
         display: inline-block;
     }
     input {
+        margin-right: .25rem;
         padding: .4rem;
         width: 14rem;
+    }
+    .icon-save {
+        @include svg-size();
+        cursor: pointer;
+        fill: $grayer;
+        margin-left: .5rem;
+        &:hover {
+            fill: $primary;
+            transition: .2s linear;
+        }
     }
     .tag {
         @extend %small;
         margin: 0 .5rem .5rem 0;
         padding: .5rem;
+    }
+    .icon-close {
+        @include svg-size(.7rem);
+        fill: $gray-light;
+        margin-left: .25rem;
+        &:hover {
+            cursor: pointer;
+            fill: $red;
+        }
     }
     .add-tag {
         color: $gray-light;
@@ -52,8 +72,8 @@
             color: $primary-light;
         }
     }
-    .icon-plus {
-        @extend %large;
+    .icon-add {
+        @include svg-size(.9rem);
     }
     .add-tag-text {
         @extend %small;

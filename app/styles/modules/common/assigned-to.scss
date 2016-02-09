@@ -1,14 +1,15 @@
 .ticket-assigned-to {
     align-items: center;
+    border-bottom: 1px solid $gray-light;
+    border-top: 1px solid $gray-light;
     display: flex;
     margin-bottom: 1rem;
+    padding: 1rem 0;
     position: relative;
     &:hover {
-        .assigned-to {
-            .icon-delete {
-                opacity: 1;
-                transition: opacity .3s linear;
-            }
+        .remove-user {
+            opacity: 1;
+            transition: opacity .3s linear;
         }
     }
     .loading-spinner {
@@ -18,10 +19,30 @@
         max-width: 2rem;
     }
     .user-avatar {
-        flex-basis: 4rem;
+        flex-basis: 3rem;
         flex-shrink: 0;
+        position: relative;
         img {
             width: 100%;
+        }
+        &.is-iocaine {
+            img {
+                filter: hue-rotate(150deg) saturate(200%);
+            }
+        }
+        .iocaine-symbol {
+            left: -.5rem;
+            position: absolute;
+            top: -.75rem;
+            z-index: 9;
+            svg {
+                background: $grayer;
+                border-radius: .25rem;
+                fill: $white;
+                min-height: 1.75rem;
+                min-width: 1.75rem;
+                padding: .25rem;
+            }
         }
     }
     .assigned-to {
@@ -32,32 +53,57 @@
             @extend %light;
             color: $gray;
             display: block;
+            margin: .2rem 0 .25rem;
         }
-        .user-assigned {
-            @extend %large;
+        .assigned-to-options {
+            display: inline-block;
+        }
+        .user-assigned,
+        .assign-to-me {
             color: $primary;
             cursor: default;
-            line-height: 1.5rem;
-            &.editable {
+            &:hover {
                 cursor: pointer;
             }
             .icon {
-                vertical-align: middle;
+                fill: currentColor;
+                height: .75rem;
+                width: .75rem;
+            }
+            span {
+                @include ellipsis(80%);
             }
         }
-        .assigned-name {
-            @include ellipsis(80%);
-            display: inline-block;
+    }
+    .remove-user {
+        fill: $gray;
+        opacity: 0;
+        position: absolute;
+        right: .5rem;
+        top: 2rem;
+        &:hover {
+            cursor: pointer;
+            fill: $red;
+            transition: fill .2s;
         }
-        .icon-delete {
-            color: $gray-light;
-            opacity: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
+    }
+    .user-assigned,
+    .assign-to-me {
+        color: $primary;
+        &:hover {
+            color: currentColor;
+        }
+        &.editable {
+            color: $primary;
             &:hover {
-                color: $red;
+                cursor: pointer;
             }
+        }
+        .icon {
+            vertical-align: middle;
+        }
+        > span {
+            @include ellipsis(80%);
         }
     }
 }

@@ -1,2 +1,6 @@
-a.button-red.button-delete(href="")
-    span(translate="COMMON.DELETE")
+a.button-red.button-delete(
+    href=""
+    title="{{ 'COMMON.DELETE' | translate }}"
+)
+    svg.icon.icon-trash
+        use(xlink:href="#icon-trash")

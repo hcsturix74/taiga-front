@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -201,7 +201,7 @@ describe "tgUserTimelineService", ->
                 expect(res.get('data').size).to.be.equal(13)
 
                 items = config.filter(res.get('data'))
-                expect(items.size).to.be.equal(6)
+                expect(items.size).to.be.equal(5)
 
                 return true
 
@@ -224,7 +224,7 @@ describe "tgUserTimelineService", ->
                 expect(res.get('data').size).to.be.equal(13)
 
                 items = config.filter(res.get('data'))
-                expect(items.size).to.be.equal(6)
+                expect(items.size).to.be.equal(5)
 
                 return true
 
@@ -247,7 +247,7 @@ describe "tgUserTimelineService", ->
                 expect(res.get('data').size).to.be.equal(13)
 
                 items = config.filter(res.get('data'))
-                expect(items.size).to.be.equal(6)
+                expect(items.size).to.be.equal(5)
 
                 return true
 

@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -58,12 +61,12 @@ TgLoadingService = ($compile) ->
                 target = service.settings.target
                 service.settings.classes.map (className) -> target.removeClass(className)
 
+                if not target.hasClass('loading') && !service.settings.template
+                    service.settings.template = target.html()
+
                 # The loader is shown after that quantity of milliseconds
                 timeoutId = setTimeout (->
                     if not target.hasClass('loading')
-                        if !service.settings.template
-                            service.settings.template = target.html()
-
                         target.addClass('loading')
 
                         target.html(spinner)
@@ -109,7 +112,7 @@ LoadingDirective = ($loading) ->
             if showLoading
                 currentLoading = $loading()
                     .target($el)
-                    .timeout(50)
+                    .timeout(100)
                     .template(template)
                     .scope($scope)
                     .start()

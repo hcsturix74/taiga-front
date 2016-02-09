@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -44,12 +47,14 @@ class HttpService extends taiga.Service
         return headers
 
     request: (options) ->
-        options.headers = _.merge({}, options.headers or {}, @.headers())
+        options.headers = _.assign({}, options.headers or {}, @.headers())
+
+        console.log options
 
         return @http(options)
 
     get: (url, params, options) ->
-        options = _.merge({method: "GET", url: url}, options)
+        options = _.assign({method: "GET", url: url}, options)
         options.params = params if params
 
         # prevent duplicated http request
@@ -59,25 +64,27 @@ class HttpService extends taiga.Service
             @.cache.removeAll()
 
     post: (url, data, params, options) ->
-        options = _.merge({method: "POST", url: url}, options)
+        options = _.assign({method: "POST", url: url}, options)
+
         options.data = data if data
         options.params = params if params
+
         return @.request(options)
 
     put: (url, data, params, options) ->
-        options = _.merge({method: "PUT", url: url}, options)
+        options = _.assign({method: "PUT", url: url}, options)
         options.data = data if data
         options.params = params if params
         return @.request(options)
 
     patch: (url, data, params, options) ->
-        options = _.merge({method: "PATCH", url: url}, options)
+        options = _.assign({method: "PATCH", url: url}, options)
         options.data = data if data
         options.params = params if params
         return @.request(options)
 
     delete: (url, data, params, options) ->
-        options = _.merge({method: "DELETE", url: url}, options)
+        options = _.assign({method: "DELETE", url: url}, options)
         options.data = data if data
         options.params = params if params
         return @.request(options)

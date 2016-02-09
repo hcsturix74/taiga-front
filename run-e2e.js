@@ -3,6 +3,8 @@ var child_process = require('child_process');
 var inquirer = require("inquirer");
 var Promise = require('bluebird');
 
+// npm run e2e -- -s userStories, auth
+
 var suites = [
     'auth',
     'public',
@@ -17,7 +19,8 @@ var suites = [
     'kanban',
     'projectHome',
     'search',
-    'team'
+    'team',
+    'discover'
 ];
 
 var lunchSuites = [];

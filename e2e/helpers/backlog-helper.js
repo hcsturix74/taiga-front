@@ -40,9 +40,7 @@ helper.getCreateEditUsLightbox = function() {
             return utils.popover.open(role, value);
         },
         getRolePoints: function() {
-            let role = obj.roles().get(0);
-
-            return role.$('.points').getText();
+            return el.$$('.ticket-role-points').last().$('.points').getText();
         }
     };
 
@@ -154,6 +152,10 @@ helper.setUsPoints = async function(item, value1, value2)  {
     return  utils.popover.open(points, value1, value2);
 };
 
+helper.getUsPoints = async function(item)  {
+    return $$('.backlog-table-body > div .us-points').get(item).$$('span').get(0).getText();
+};
+
 helper.deleteUs = function(item) {
     $$('.backlog-table-body > div .icon-delete').get(item).click();
 };
@@ -194,4 +196,10 @@ helper.getSprintsTitles = function() {
 
 helper.goBackFilters = function() {
     return $$('.filters-step-cat .breadcrumb a').first().click();
+};
+
+helper.fiterRole = async function(value) {
+    let rolePointsSelector = $('div[tg-us-role-points-selector]');
+
+    return utils.popover.open(rolePointsSelector, value);
 };

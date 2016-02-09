@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -100,3 +100,24 @@ describe "WatchButton", ->
             expect(ctrl.loading).to.be.false;
 
             done()
+
+
+    it "get permissions", () ->
+        $scope = $rootScope.$new()
+
+        ctrl = $controller("WatchButton", $scope, {
+            item: {_name: 'tasks'}
+        })
+
+        perm = ctrl.getPerms()
+        expect(perm).to.be.equal('modify_task')
+
+        ctrl.item = {_name: 'issues'}
+
+        perm = ctrl.getPerms()
+        expect(perm).to.be.equal('modify_issue')
+
+        ctrl.item = {_name: 'userstories'}
+
+        perm = ctrl.getPerms()
+        expect(perm).to.be.equal('modify_us')

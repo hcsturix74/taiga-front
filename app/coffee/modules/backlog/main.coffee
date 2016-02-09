@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -51,11 +54,12 @@ class BacklogController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.F
         "$tgEvents",
         "$tgAnalytics",
         "$translate",
-        "$tgLoading"
+        "$tgLoading",
+        "tgResources"
     ]
 
     constructor: (@scope, @rootscope, @repo, @confirm, @rs, @params, @q,
-                  @location, @appMetaService, @navUrls, @events, @analytics, @translate, @loading) ->
+                  @location, @appMetaService, @navUrls, @events, @analytics, @translate, @loading, @rs2) ->
         bindMethods(@)
 
         @scope.sectionName = @translate.instant("BACKLOG.SECTION_NAME")
@@ -198,6 +202,9 @@ class BacklogController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.F
             @scope.sprintsCounter = sprints.length
             @scope.sprintsById = groupBy(sprints, (x) -> x.id)
             @rootscope.$broadcast("sprints:loaded", sprints)
+
+            @scope.currentSprint = @.findCurrentSprint()
+
             return sprints
 
     restoreFilters: ->
@@ -228,8 +235,8 @@ class BacklogController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.F
         @scope.oldSelectedStatuses = selectedStatuses
 
         @scope.filtersQOld = @scope.filtersQ
-        @scope.filtersQ = ""
-        @.replaceFilter("q", null)
+        @scope.filtersQ = undefined
+        @.replaceFilter("q", @scope.filtersQ)
 
         _.each [selectedTags, selectedStatuses], (filterGrp) =>
             _.each filterGrp, (item) =>
@@ -556,14 +563,14 @@ class BacklogController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.F
 
         currentLoading = @loading()
             .target(target)
-            .removeClasses("icon-edit")
+            .removeClasses("edit-story")
             .timeout(200)
             .start()
 
-        @rs.userstories.getByRef(projectId, ref).then (us) =>
-            @rootscope.$broadcast("usform:edit", us)
-
-            currentLoading.finish()
+        return @rs.userstories.getByRef(projectId, ref).then (us) =>
+            @rs2.attachments.list("us", us.id, projectId).then (attachments) =>
+                @rootscope.$broadcast("usform:edit", us, attachments.toJS())
+                currentLoading.finish()
 
     deleteUserStory: (us) ->
         title = @translate.instant("US.TITLE_DELETE_ACTION")
@@ -590,6 +597,15 @@ class BacklogController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.F
 
     addNewSprint: () ->
         @rootscope.$broadcast("sprintform:create", @scope.projectId)
+
+    findCurrentSprint: () ->
+      currentDate = new Date().getTime()
+
+      return  _.find @scope.sprints, (sprint) ->
+        start = moment(sprint.estimated_start, 'YYYY-MM-DD').format('x')
+        end = moment(sprint.estimated_finish, 'YYYY-MM-DD').format('x')
+
+        return currentDate >= start && currentDate <= end
 
 module.controller("BacklogController", BacklogController)
 
@@ -641,7 +657,17 @@ BacklogDirective = ($repo, $rootscope, $translate) ->
     ## Move to current sprint link
 
     linkToolbar = ($scope, $el, $attrs, $ctrl) ->
-        moveToCurrentSprint = (selectedUss) ->
+        getUsToMove = () ->
+            # Calculating the us's to be modified
+            ussDom = $el.find(".backlog-table-body input:checkbox:checked")
+
+            return _.map ussDom, (item) ->
+                item =  $(item).closest('.tg-scope')
+                itemScope = item.scope()
+                itemScope.us.milestone = $scope.sprints[0].id
+                return itemScope.us
+
+        moveUssToSprint = (selectedUss, sprint) ->
             ussCurrent = _($scope.userstories)
 
             # Remove them from backlog
@@ -651,30 +677,36 @@ BacklogDirective = ($repo, $rootscope, $translate) ->
             totalExtraPoints =  _.reduce(extraPoints, (acc, num) -> acc + num)
 
             # Add them to current sprint
-            $scope.sprints[0].user_stories = _.union($scope.sprints[0].user_stories, selectedUss)
+            sprint.user_stories = _.union(sprint.user_stories, selectedUss)
 
             # Update the total of points
-            $scope.sprints[0].total_points += totalExtraPoints
+            sprint.total_points += totalExtraPoints
 
             $repo.saveAll(selectedUss).then ->
                 $ctrl.loadSprints()
                 $ctrl.loadProjectStats()
 
+            $el.find(".move-to-sprint").hide()
+
+        moveToCurrentSprint = (selectedUss) ->
+            moveUssToSprint(selectedUss, $scope.currentSprint)
+
+        moveToLatestSprint = (selectedUss) ->
+            moveUssToSprint(selectedUss, $scope.sprints[0])
 
         shiftPressed = false
         lastChecked = null
 
         checkSelected = (target) ->
             lastChecked = target.closest(".us-item-row")
-            moveToCurrentSprintDom = $el.find("#move-to-current-sprint")
+            target.closest('.us-item-row').toggleClass('ui-multisortable-multiple')
+            moveToSprintDom = $el.find(".move-to-sprint")
             selectedUsDom = $el.find(".backlog-table-body input:checkbox:checked")
 
             if selectedUsDom.length > 0 and $scope.sprints.length > 0
-                moveToCurrentSprintDom.show()
+                moveToSprintDom.show()
             else
-                moveToCurrentSprintDom.hide()
-
-            target.closest('.us-item-row').toggleClass('ui-multisortable-multiple')
+                moveToSprintDom.hide()
 
         $(window).on "keydown.shift-pressed keyup.shift-pressed", (event) ->
             shiftPressed = !!event.shiftKey
@@ -704,15 +736,13 @@ BacklogDirective = ($repo, $rootscope, $translate) ->
             target.closest(".us-item-row").toggleClass('is-checked')
             checkSelected(target)
 
-        $el.on "click", "#move-to-current-sprint", (event) =>
-            # Calculating the us's to be modified
-            ussDom = $el.find(".backlog-table-body input:checkbox:checked")
+        $el.on "click", "#move-to-latest-sprint", (event) =>
+            ussToMove = getUsToMove()
 
-            ussToMove = _.map ussDom, (item) ->
-                item =  $(item).closest('.tg-scope')
-                itemScope = item.scope()
-                itemScope.us.milestone = $scope.sprints[0].id
-                return itemScope.us
+            $scope.$apply(_.partial(moveToLatestSprint, ussToMove))
+
+        $el.on "click", "#move-to-current-sprint", (event) =>
+            ussToMove = getUsToMove()
 
             $scope.$apply(_.partial(moveToCurrentSprint, ussToMove))
 
@@ -852,7 +882,7 @@ UsRolePointsSelectorDirective = ($rootscope, $template, $compile, $translate) ->
 
     return {link: link}
 
-module.directive("tgUsRolePointsSelector", ["$rootScope", "$tgTemplate", "$compile", UsRolePointsSelectorDirective])
+module.directive("tgUsRolePointsSelector", ["$rootScope", "$tgTemplate", "$compile", "$translate", UsRolePointsSelectorDirective])
 
 
 UsPointsDirective = ($tgEstimationsService, $repo, $tgTemplate) ->
@@ -1038,12 +1068,6 @@ BurndownBacklogGraphDirective = ($translate) ->
             lines:
                 fillColor : "rgba(102,153,51,0.3)"
         })
-        team_increment_line = _.map(dataToDraw.milestones, (ml) -> -ml["team-increment"])
-        data.push({
-            data: _.zip(milestonesRange, team_increment_line)
-            lines:
-                fillColor : "rgba(153,51,51,0.3)"
-        })
         client_increment_line = _.map dataToDraw.milestones, (ml) ->
             -ml["team-increment"] - ml["client-increment"]
         data.push({
@@ -1051,7 +1075,12 @@ BurndownBacklogGraphDirective = ($translate) ->
             lines:
                 fillColor : "rgba(255,51,51,0.3)"
         })
-
+        team_increment_line = _.map(dataToDraw.milestones, (ml) -> -ml["team-increment"])
+        data.push({
+            data: _.zip(milestonesRange, team_increment_line)
+            lines:
+                fillColor : "rgba(153,51,51,0.3)"
+        })
         colors = [
             "rgba(0,0,0,1)"
             "rgba(120,120,120,0.2)"
@@ -1107,10 +1136,10 @@ BurndownBacklogGraphDirective = ($translate) ->
                         return $translate.instant("BACKLOG.CHART.REAL", ctx)
                     else if flotItem.seriesIndex == 3
                         ctx = {sprintName: dataToDraw.milestones[xval].name, value: Math.abs(yval)}
-                        return $translate.instant("BACKLOG.CHART.INCREMENT_TEAM", ctx)
+                        return $translate.instant("BACKLOG.CHART.INCREMENT_CLIENT", ctx)
                     else
                         ctx = {sprintName: dataToDraw.milestones[xval].name, value: Math.abs(yval)}
-                        return $translate.instant("BACKLOG.CHART.INCREMENT_CLIENT", ctx)
+                        return $translate.instant("BACKLOG.CHART.INCREMENT_TEAM", ctx)
             }
         }
 

@@ -9,6 +9,8 @@ html(lang="en")
         title Taiga
         meta(name="description", content="Taiga is a project management platform for startups and agile developers & designers who want a simple, beautiful tool that makes work truly enjoyable.")
         meta(name="keywords", content="agile, scrum, taiga, management, project, developer, designer, user experience")
+        meta(http-equiv="X-Frame-Options", content="deny")
+
         //-meta(name="viewport", content="width=device-width, user-scalable=no")
         link(rel="stylesheet", href="/#{v}/styles/theme-taiga.css")
         link(rel="icon", type="image/png", href="/#{v}/images/favicon.png")
@@ -38,7 +40,9 @@ html(lang="en")
         include partials/includes/components/notification-message
 
         div(tg-joy-ride)
+        div(tg-live-announcement)
 
         script(src="/#{v}/js/libs.js")
         script(src="/#{v}/js/templates.js")
         script(src="/#{v}/js/app-loader.js")
+        include svg/sprite.svg

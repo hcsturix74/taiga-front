@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -37,7 +40,7 @@ BacklogSprintDirective = ($repo, $rootscope) ->
 
     toggleSprint = ($el) =>
         sprintTable = $el.find(".sprint-table")
-        sprintArrow = $el.find(".icon-arrow-up")
+        sprintArrow = $el.find(".compact-sprint")
 
         sprintArrow.toggleClass('active')
         sprintTable.toggleClass('open')
@@ -52,7 +55,7 @@ BacklogSprintDirective = ($repo, $rootscope) ->
                 toggleSprint($el)
 
         # Event Handlers
-        $el.on "click", ".sprint-name > .icon-arrow-up", (event) ->
+        $el.on "click", ".sprint-name > .compact-sprint", (event) ->
             event.preventDefault()
 
             toggleSprint($el)

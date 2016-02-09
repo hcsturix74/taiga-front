@@ -28,7 +28,7 @@ window.getDecorators = ->
     return window._decorators
 
 loadStylesheet = (path) ->
-    $('head').append('<link rel="stylesheet" href="' + path + '" type="stylesheet" />')
+    $('head').append('<link rel="stylesheet" href="' + path + '" type="text/css" />')
 
 loadPlugin = (pluginPath) ->
     return new Promise (resolve, reject) ->
@@ -53,7 +53,7 @@ loadPlugins = (plugins) ->
 
 promise = $.getJSON "/conf.json"
 promise.done (data) ->
-    window.taigaConfig = _.extend({}, window.taigaConfig, data)
+    window.taigaConfig = _.assign({}, window.taigaConfig, data)
 
 promise.always ->
     if window.taigaConfig.contribPlugins.length > 0

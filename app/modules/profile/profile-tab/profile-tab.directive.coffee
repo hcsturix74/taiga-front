@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,6 +28,7 @@ ProfileTabDirective = () ->
             scope.tab.title = title
 
         scope.tab.icon = attrs.tabIcon
+        scope.tab.iconName = '#' + attrs.tabIcon
         scope.tab.active = !!attrs.tabActive
 
         if scope.$eval(attrs.tabDisabled) != true

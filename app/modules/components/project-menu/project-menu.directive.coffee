@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,6 +30,16 @@ ProjectMenuDirective = (projectService, lightboxFactory) ->
         scope.$watch ( () ->
             return projectService.project
         ), projectChange
+
+        scope.vm.fixed = false
+        $(window).on "scroll", () ->
+            position = $(window).scrollTop()
+            if position > 100 && scope.vm.fixed == false
+                scope.vm.fixed = true
+                scope.$digest()
+            else if position < 100 && scope.vm.fixed == true
+                scope.vm.fixed = false
+                scope.$digest()
 
     return {
         scope: {},

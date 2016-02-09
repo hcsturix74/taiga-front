@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -20,9 +20,10 @@
 class WatchButtonController
     @.$inject = [
         "tgCurrentUserService",
+        "$rootScope"
     ]
 
-    constructor: (@currentUserService) ->
+    constructor: (@currentUserService, @rootScope) ->
         @.user = @currentUserService.getUser()
         @.isMouseOver = false
         @.loading = false
@@ -32,6 +33,22 @@ class WatchButtonController
 
     showTextWhenMouseIsLeave: ->
         @.isMouseOver = false
+
+    openWatchers: ->
+        @rootScope.$broadcast("watcher:add", @.item)
+
+    getPerms: ->
+        return "" if !@.item
+
+        name = @.item._name
+
+        perms = {
+            userstories: 'modify_us',
+            issues: 'modify_issue',
+            tasks: 'modify_task'
+        }
+
+        return perms[name]
 
     toggleWatch: ->
         @.loading = true

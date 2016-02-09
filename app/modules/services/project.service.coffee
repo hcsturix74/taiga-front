@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -66,6 +66,9 @@ class ProjectService
         @._activeMembers = Immutable.List()
         @._section = null
         @._sectionsBreadcrumb = Immutable.List()
+
+    hasPermission: (permission) ->
+        return @._project.get('my_permissions').indexOf(permission) != -1
 
     fetchProject: () ->
         pslug = @.project.get('slug')

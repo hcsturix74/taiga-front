@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -63,14 +66,34 @@ configure = ($routeProvider, $locationProvider, $httpProvider, $provide, $tgEven
     $routeProvider.when("/",
         {
             templateUrl: "home/home.html",
-            access: {
-                requiresLogin: true
-            },
+            controller: "Home",
+            controllerAs: "vm"
             loader: true,
             title: "HOME.PAGE_TITLE",
             loader: true,
             description: "HOME.PAGE_DESCRIPTION",
             joyride: "dashboard"
+        }
+    )
+
+    $routeProvider.when("/discover",
+        {
+            templateUrl: "discover/discover-home/discover-home.html",
+            controller: "DiscoverHome",
+            controllerAs: "vm",
+            title: "PROJECT.NAVIGATION.DISCOVER",
+            loader: true
+        }
+    )
+
+    $routeProvider.when("/discover/search",
+        {
+            templateUrl: "discover/discover-search/discover-search.html",
+            title: "PROJECT.NAVIGATION.DISCOVER",
+            loader: true,
+            controller: "DiscoverSearch",
+            controllerAs: "vm",
+            reloadOnSearch: false
         }
     )
 
@@ -312,6 +335,10 @@ configure = ($routeProvider, $locationProvider, $httpProvider, $provide, $tgEven
     $routeProvider.when("/cancel-account/:cancel_token",
         {templateUrl: "user/cancel-account.html"})
 
+    # UserSettings - Contrib Plugins
+    $routeProvider.when("/user-settings/contrib/:plugin",
+        {templateUrl: "contrib/user-settings.html"})
+
     # User profile
     $routeProvider.when("/profile",
         {
@@ -487,16 +514,6 @@ configure = ($routeProvider, $locationProvider, $httpProvider, $provide, $tgEven
 
     $httpProvider.interceptors.push("versionCheckHttpIntercept")
 
-    window.checksley.updateValidators({
-        linewidth: (val, width) ->
-            lines = taiga.nl2br(val).split("<br />")
-
-            valid = _.every lines, (line) ->
-                line.length < width
-
-            return valid
-    })
-
     $compileProvider.debugInfoEnabled(window.taigaConfig.debugInfo || false)
 
     if localStorage.userInfo
@@ -554,6 +571,8 @@ i18nInit = (lang, $translate) ->
         maxcheck: $translate.instant("COMMON.FORM_ERRORS.MAX_CHECK")
         rangecheck: $translate.instant("COMMON.FORM_ERRORS.RANGE_CHECK")
         equalto: $translate.instant("COMMON.FORM_ERRORS.EQUAL_TO")
+        linewidth: $translate.instant("COMMON.FORM_ERRORS.LINEWIDTH") # Extra validator
+        pikaday: $translate.instant("COMMON.FORM_ERRORS.PIKADAY") # Extra validator
     }
     checksley.updateMessages('default', messages)
 
@@ -561,9 +580,25 @@ i18nInit = (lang, $translate) ->
 init = ($log, $rootscope, $auth, $events, $analytics, $translate, $location, $navUrls, appMetaService, projectService, loaderService, navigationBarService) ->
     $log.debug("Initialize application")
 
+    # Checksley - Extra validators
+    validators = {
+        linewidth: (val, width) ->
+            lines = taiga.nl2br(val).split("<br />")
+
+            valid = _.every lines, (line) ->
+                line.length < width
+
+            return valid
+        pikaday: (val) ->
+            prettyDate = $translate.instant("COMMON.PICKERDATE.FORMAT")
+            return moment(val, prettyDate).isValid()
+    }
+    checksley.updateValidators(validators)
+
     # Taiga Plugins
     $rootscope.contribPlugins = @.taigaContribPlugins
-    $rootscope.adminPlugins = _.where(@.taigaContribPlugins, {"type": "admin"})
+    $rootscope.adminPlugins = _.filter(@.taigaContribPlugins, {"type": "admin"})
+    $rootscope.userSettingsPlugins = _.filter(@.taigaContribPlugins, {"type": "userSettings"})
 
     $rootscope.$on "$translateChangeEnd", (e, ctx) ->
         lang = ctx.language
@@ -573,9 +608,10 @@ init = ($log, $rootscope, $auth, $events, $analytics, $translate, $location, $na
     Promise.setScheduler (cb) ->
         $rootscope.$evalAsync(cb)
 
+    $events.setupConnection()
+
     # Load user
     if $auth.isAuthenticated()
-        $events.setupConnection()
         user = $auth.getUser()
 
     # Analytics
@@ -660,6 +696,7 @@ modules = [
     "taigaHome",
     "taigaUserTimeline",
     "taigaExternalApps",
+    "taigaDiscover",
 
     # template cache
     "templates",

@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -56,16 +59,19 @@ mixOf = (base, mixins...) ->
 
 
 trim = (data, char) ->
-    return _.str.trim(data, char)
+    return _.trim(data, char)
 
 
 slugify = (data) ->
-    return _.str.slugify(data)
-
+    return data.toString().toLowerCase().trim()
+        .replace(/\s+/g, '-')
+        .replace(/&/g, '-and-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
 
 unslugify = (data) ->
     if data
-        return _.str.capitalize(data.replace(/-/g, ' '))
+        return _.capitalize(data.replace(/-/g, ' '))
     return data
 
 
@@ -111,7 +117,7 @@ toString = (value) ->
 
 
 joinStr = (str, coll) ->
-    return _.str.join(str, coll)
+    return coll.join(str)
 
 
 debounce = (wait, func) ->
@@ -123,7 +129,7 @@ debounceLeading = (wait, func) ->
 
 
 startswith = (str1, str2) ->
-    return _.str.startsWith(str1, str2)
+    return _.startsWith(str1, str2)
 
 
 truncate = (str, maxLength, suffix="...") ->
@@ -192,6 +198,29 @@ _.mixin
                 delete obj[key]; obj
             , obj).value()
 
+    cartesianProduct: ->
+        _.reduceRight(
+            arguments, (a,b) ->
+                _.flatten(_.map(a, (x) -> _.map b, (y) -> [y].concat(x)), true)
+            , [ [] ])
+
+
+
+isImage = (name) ->
+    return name.match(/\.(jpe?g|png|gif|gifv|webm)/i) != null
+
+patch = (oldImmutable, newImmutable) ->
+    pathObj = {}
+
+    newImmutable.forEach (newValue, key) ->
+        if newValue != oldImmutable.get(key)
+            if newValue.toJS
+                pathObj[key] = newValue.toJS()
+            else
+                pathObj[key] = newValue
+
+    return pathObj
+
 taiga = @.taiga
 taiga.nl2br = nl2br
 taiga.bindMethods = bindMethods
@@ -215,3 +244,5 @@ taiga.sizeFormat = sizeFormat
 taiga.stripTags = stripTags
 taiga.replaceTags = replaceTags
 taiga.defineImmutableProperty = defineImmutableProperty
+taiga.isImage = isImage
+taiga.patch = patch

@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,8 @@ WatchButtonDirective = ->
             onUnwatch: "="
         }
         controllerAs: "vm",
-        templateUrl: "components/watch-button/watch-button.html",
+        templateUrl: (item, attributes) ->
+            return "components/watch-button/watch-button-"+attributes.environment+".html"
     }
 
 angular.module("taigaComponents").directive("tgWatchButton", WatchButtonDirective)

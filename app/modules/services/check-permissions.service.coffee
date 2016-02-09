@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,8 @@ class ChekcPermissionsService
     constructor: (@projectService) ->
 
     check: (permission) ->
+        return false if !@projectService.project
+
         return @projectService.project.get('my_permissions').indexOf(permission) != -1
 
 angular.module("taigaCommon").service("tgCheckPermissionsService", ChekcPermissionsService)

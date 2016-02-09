@@ -1,5 +1,5 @@
 ###
-# Copyright (C) 2014-2015 Taiga Agile LLC <taiga@taiga.io>
+# Copyright (C) 2014-2016 Taiga Agile LLC <taiga@taiga.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -72,13 +72,14 @@ class ProjectMenuController
 
     _getActiveSection: () ->
         sectionName = @projectService.section
+
         sectionsBreadcrumb = @projectService.sectionsBreadcrumb
 
         indexBacklog = sectionsBreadcrumb.lastIndexOf("backlog")
         indexKanban = sectionsBreadcrumb.lastIndexOf("kanban")
 
         if indexBacklog != -1 || indexKanban != -1
-            if indexKanban == -1 || indexBacklog < indexKanban
+            if indexKanban == -1 || indexBacklog > indexKanban
                 oldSectionName = "backlog"
             else
                 oldSectionName = "kanban"

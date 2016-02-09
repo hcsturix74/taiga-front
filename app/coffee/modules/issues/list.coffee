@@ -1,7 +1,10 @@
 ###
-# Copyright (C) 2014-2015 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014-2015 Jesús Espino Garcia <jespinog@gmail.com>
-# Copyright (C) 2014-2015 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Andrey Antukh <niwi@niwi.nz>
+# Copyright (C) 2014-2016 Jesús Espino Garcia <jespinog@gmail.com>
+# Copyright (C) 2014-2016 David Barragán Merino <bameda@dbarragan.com>
+# Copyright (C) 2014-2016 Alejandro Alonso <alejandro.alonso@kaleidos.net>
+# Copyright (C) 2014-2016 Juan Francisco Alcántara <juanfran.alcantara@kaleidos.net>
+# Copyright (C) 2014-2016 Xavi Julian <xavier.julian@kaleidos.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -458,14 +461,14 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
         showFilters = (title, type) ->
             $el.find(".filters-cats").hide()
             $el.find(".filter-list").removeClass("hidden")
-            $el.find("h2.breadcrumb").removeClass("hidden")
-            $el.find("h2 a.subfilter span.title").html(title)
-            $el.find("h2 a.subfilter span.title").prop("data-type", type)
+            $el.find(".breadcrumb").removeClass("hidden")
+            $el.find("h2 .subfilter .title").html(title)
+            $el.find("h2 .subfilter .title").prop("data-type", type)
 
         showCategories = ->
             $el.find(".filters-cats").show()
             $el.find(".filter-list").addClass("hidden")
-            $el.find("h2.breadcrumb").addClass("hidden")
+            $el.find(".breadcrumb").addClass("hidden")
 
         initializeSelectedFilters = (filters) ->
             selectedFilters = []
@@ -499,7 +502,7 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
             $el.find(".filter-list").html(html)
 
         getFiltersType = () ->
-            return $el.find("h2 a.subfilter span.title").prop('data-type')
+            return $el.find(".subfilter .title").prop('data-type')
 
         reloadIssues = () ->
             currentFiltersType = getFiltersType()
@@ -614,7 +617,7 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
 
             toggleFilterSelection(type, id)
 
-        $el.on "click", ".filter-list .single-filter .icon-delete", (event) ->
+        $el.on "click", ".filter-list .single-filter .remove-filter", (event) ->
             event.preventDefault()
             event.stopPropagation()
 
@@ -662,7 +665,7 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
                         currentLoading.finish()
                         $scope.filters.myFilters = filters
 
-                        currentfilterstype = $el.find("h2 a.subfilter span.title").prop('data-type')
+                        currentfilterstype = $el.find("h2 .subfilter .title").prop('data-type')
                         if currentfilterstype == "myFilters"
                             renderFilters($scope.filters.myFilters)
 
@@ -775,7 +778,7 @@ module.directive("tgIssueStatusInlineEdition", ["$tgRepo", "$tgTemplate", "$root
 ## Issue assigned to Directive
 #############################################################################
 
-IssueAssignedToInlineEditionDirective = ($repo, $rootscope, popoverService) ->
+IssueAssignedToInlineEditionDirective = ($repo, $rootscope, $translate) ->
     template = _.template("""
     <img src="<%- imgurl %>" alt="<%- name %>"/>
     <figcaption><%- name %></figcaption>
@@ -783,11 +786,15 @@ IssueAssignedToInlineEditionDirective = ($repo, $rootscope, popoverService) ->
 
     link = ($scope, $el, $attrs) ->
         updateIssue = (issue) ->
-            ctx = {name: "Unassigned", imgurl: "/" + window._version + "/images/unnamed.png"}
+            ctx = {
+                name: $translate.instant("COMMON.ASSIGNED_TO.NOT_ASSIGNED"),
+                imgurl: "/#{window._version}/images/unnamed.png"
+            }
+
             member = $scope.usersById[issue.assigned_to]
             if member
-                ctx.imgurl = member.photo
                 ctx.name = member.full_name_display
+                ctx.imgurl = member.photo
 
             $el.find(".avatar").html(template(ctx))
             $el.find(".issue-assignedto").attr('title', ctx.name)
@@ -819,5 +826,5 @@ IssueAssignedToInlineEditionDirective = ($repo, $rootscope, popoverService) ->
 
     return {link: link}
 
-module.directive("tgIssueAssignedToInlineEdition", ["$tgRepo", "$rootScope",
+module.directive("tgIssueAssignedToInlineEdition", ["$tgRepo", "$rootScope", "$translate"
                                                     IssueAssignedToInlineEditionDirective])
